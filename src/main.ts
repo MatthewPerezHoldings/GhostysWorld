@@ -1,5 +1,7 @@
 import Phaser from "phaser";
 import { GAME_W, GAME_H } from "./config";
+import { BootScene } from "./scenes/BootScene";
+import { TitleScene } from "./scenes/TitleScene";
 
 new Phaser.Game({
   type: Phaser.AUTO,
@@ -9,5 +11,5 @@ new Phaser.Game({
   backgroundColor: "#000000",
   physics: { default: "arcade", arcade: { debug: false } },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [],
+  scene: [BootScene, TitleScene],
 });
