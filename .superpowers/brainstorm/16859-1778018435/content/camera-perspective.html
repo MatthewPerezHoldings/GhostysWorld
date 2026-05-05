@@ -1,0 +1,73 @@
+<h2>How does the camera see Ghosty's World?</h2>
+<p class="subtitle">This is the single biggest design choice — it shapes everything: art, controls, level design, and how the dogs hunt the mailman.</p>
+
+<div class="options">
+
+  <div class="option" data-choice="topdown" onclick="toggleSelect(this)">
+    <div class="letter">A</div>
+    <div class="content">
+      <h3>Top-down (bird's-eye)</h3>
+      <p><strong>Think:</strong> classic Zelda, Pokémon, Hotline Miami.</p>
+      <p>Camera looks straight down at the yard. Mailman walks in from the gate, navigates around obstacles (bushes, garden gnomes, kiddie pool). Ghost and the Golden each patrol zones — you sneak/dash to the door slot.</p>
+      <div class="mockup">
+        <div class="mockup-header">Top-down — fence around the yard, door at top, mailman at bottom</div>
+        <div class="mockup-body" style="background:#7ec27e;padding:14px;font-family:monospace;line-height:1.4">
+          <div style="color:#5a3a1a">═══════════ 🚪 ═══════════</div>
+          <div>║ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;🌳 &nbsp;&nbsp; 🐕‍🦺 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ║</div>
+          <div>║ 🌷 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🌳 ║</div>
+          <div>║ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🦴 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ║</div>
+          <div>║ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🐩 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🌳 ║</div>
+          <div>║ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 📬 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ║</div>
+          <div style="color:#5a3a1a">═══════════ 🚪 ═══════════</div>
+          <div style="text-align:center;margin-top:6px;color:#234">⌨ WASD / arrows to move &nbsp;&nbsp; SPACE to dash</div>
+        </div>
+      </div>
+      <p><strong>Best for:</strong> stealth, level layout creativity, multiple dogs visible at once, future levels (different houses).</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="sidescroll" onclick="toggleSelect(this)">
+    <div class="letter">B</div>
+    <div class="content">
+      <h3>Side-scroller</h3>
+      <p><strong>Think:</strong> Mario, Crash Bandicoot, old Sonic.</p>
+      <p>Camera from the side. Mailman runs left → right toward the front door. Jumps over Ghost, slides under the Golden, dodges thrown bones. Reaches the door, slot opens, drops mail in.</p>
+      <div class="mockup">
+        <div class="mockup-header">Side view — sky above, ground below, mailman runs right</div>
+        <div class="mockup-body" style="background:linear-gradient(#9ed1ff 0%,#9ed1ff 60%,#7ec27e 60%);padding:14px;font-family:monospace;line-height:1.4;min-height:120px">
+          <div style="text-align:right;color:#fc6">&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;☀️</div>
+          <div style="margin-top:30px">📬 &nbsp;&nbsp;&nbsp; 🐕‍🦺 &nbsp;&nbsp;&nbsp;&nbsp; 🦴→ &nbsp;&nbsp;&nbsp; 🐩 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🏠</div>
+          <div style="border-top:3px solid #5a3a1a;margin-top:6px;color:#5a3a1a">▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔▔</div>
+          <div style="text-align:center;margin-top:6px;color:#234">⌨ → run &nbsp;&nbsp; SPACE jump &nbsp;&nbsp; ↓ slide</div>
+        </div>
+      </div>
+      <p><strong>Best for:</strong> tight, snappy gameplay; easy to grasp; great for short replayable runs ("got farther this time!").</p>
+    </div>
+  </div>
+
+  <div class="option" data-choice="single-screen" onclick="toggleSelect(this)">
+    <div class="letter">C</div>
+    <div class="content">
+      <h3>Single-screen "puzzle arena"</h3>
+      <p><strong>Think:</strong> Pac-Man, Bomberman, old arcade single-board games.</p>
+      <p>Whole front yard fits on one screen — no scrolling. Mailman starts at the gate, must reach the door slot. Ghost and the Golden have AI patrol patterns you have to read. Each level is a new yard layout.</p>
+      <div class="mockup">
+        <div class="mockup-header">Whole yard visible at once — pure cat-and-mouse</div>
+        <div class="mockup-body" style="background:#7ec27e;padding:14px;font-family:monospace;line-height:1.4">
+          <div style="color:#5a3a1a">┌─────── 🚪 ────────┐</div>
+          <div>│ &nbsp;🐕‍🦺↺&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; 🌳 │</div>
+          <div>│ 🌳 &nbsp;&nbsp;&nbsp; ▓▓▓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │</div>
+          <div>│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ▓ 🦴 &nbsp;&nbsp; 🐩↺ │</div>
+          <div>│ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ▓▓▓ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │</div>
+          <div>│ 📬→ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; │</div>
+          <div style="color:#5a3a1a">└──────────────────┘</div>
+          <div style="text-align:center;margin-top:6px;color:#234">⌨ WASD &nbsp;&nbsp; ↺ = dog patrol path</div>
+        </div>
+      </div>
+      <p><strong>Best for:</strong> "one more try" puzzle vibe; each level designed by hand; clearest showcase for Ghost-the-dog as a character.</p>
+    </div>
+  </div>
+
+</div>
+
+<p class="subtitle" style="margin-top:18px"><strong>My pick:</strong> <strong>C — single-screen puzzle arena</strong>. It makes Ghost the star (you can see him patrolling the whole time), it's the easiest to make great quickly, and "deliver the mail without getting caught" maps perfectly onto an arcade-puzzle loop. But if you want a longer-running, side-scrolly experience, B is the move.</p>
