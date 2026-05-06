@@ -20,8 +20,8 @@ export class TouchInput {
     const w = scene.cameras.main.width;
     const h = scene.cameras.main.height;
 
-    // D-pad (bottom-left, sized for thumb)
-    const padCx = 80;
+    // D-pad on the right (right thumb / dominant hand)
+    const padCx = w - 80;
     const padCy = h - 80;
     const r = 56;
     const padBg = scene.add.circle(padCx, padCy, r, 0xffffff, 0.18).setScrollFactor(0).setDepth(900);
@@ -45,10 +45,10 @@ export class TouchInput {
     // Sneak button (above D-pad)
     this.makeButton(scene, padCx, padCy - r - 50, "S", () => { this.sneak = true; }, () => { this.sneak = false; });
 
-    // Action buttons (bottom-right thumb cluster)
-    const actX = w - 80;
+    // Action buttons (bottom-left thumb cluster)
+    const actX = 80;
     const actY = h - 80;
-    this.makeButton(scene, actX - 70, actY,       "🥩", () => this.press(this.treat),    () => this.release(this.treat));
+    this.makeButton(scene, actX + 70, actY,       "🥩", () => this.press(this.treat),    () => this.release(this.treat));
     this.makeButton(scene, actX,      actY - 70,  "🐿️", () => this.press(this.squirrel), () => this.release(this.squirrel));
     this.makeButton(scene, actX,      actY,       "🐢", () => this.press(this.turtle),   () => this.release(this.turtle));
   }
