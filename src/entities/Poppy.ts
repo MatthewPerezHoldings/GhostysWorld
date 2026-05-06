@@ -16,6 +16,7 @@ const BARK_DURATION = 0.5;
 export interface PoppyConfig {
   patrol: readonly Vec2[];
   holesPerLevel: number;
+  speedMultiplier?: number;
 }
 
 export interface Hole extends Vec2 {}
@@ -169,14 +170,19 @@ export class Poppy extends Phaser.Physics.Arcade.Sprite {
     }
   }
 
+  private get speedMul(): number {
+    return this.cfg.speedMultiplier ?? 1;
+  }
+
   private tickPatrol(deltaSec: number) {
     this.patrolElapsed += deltaSec;
-    const target = positionOnPatrol(this.cfg.patrol, POPPY_PATROL_SPEED, this.patrolElapsed);
+    const speed = POPPY_PATROL_SPEED * this.speedMul;
+    const target = positionOnPatrol(this.cfg.patrol, speed, this.patrolElapsed);
     const dx = target.x - this.x;
     const dy = target.y - this.y;
     const mag = Math.hypot(dx, dy);
     if (mag > 1) {
-      this.setVelocity((dx / mag) * POPPY_PATROL_SPEED, (dy / mag) * POPPY_PATROL_SPEED);
+      this.setVelocity((dx / mag) * speed, (dy / mag) * speed);
     } else {
       this.setVelocity(0, 0);
     }
@@ -190,7 +196,8 @@ export class Poppy extends Phaser.Physics.Arcade.Sprite {
       this.setVelocity(0, 0);
       return;
     }
-    this.setVelocity((dx / mag) * POPPY_CHASE_SPEED, (dy / mag) * POPPY_CHASE_SPEED);
+    const speed = POPPY_CHASE_SPEED * this.speedMul;
+    this.setVelocity((dx / mag) * speed, (dy / mag) * speed);
   }
 
   private tickChargeToward(target: Vec2) {
@@ -201,6 +208,7 @@ export class Poppy extends Phaser.Physics.Arcade.Sprite {
       this.setVelocity(0, 0);
       return;
     }
-    this.setVelocity((dx / mag) * POPPY_PATROL_SPEED, (dy / mag) * POPPY_PATROL_SPEED);
+    const speed = POPPY_PATROL_SPEED * this.speedMul;
+    this.setVelocity((dx / mag) * speed, (dy / mag) * speed);
   }
 }

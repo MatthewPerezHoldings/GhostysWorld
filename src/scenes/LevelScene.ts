@@ -99,6 +99,7 @@ export class LevelScene extends Phaser.Scene {
         { x: TILE_SIZE * 4, y: TILE_SIZE * 13 },
       ],
       holesPerLevel: cfg.poppyHoles,
+      speedMultiplier: cfg.poppySpeedMultiplier,
     });
     this.poppy.seedHoles(cfg.poppyHoles);
     this.physics.add.collider(this.poppy, this.fenceGroup);
