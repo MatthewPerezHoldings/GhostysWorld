@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 
-export type SfxKey = "bark" | "toot" | "chime" | "dig" | "treat" | "alert" | "step";
+export type SfxKey = "bark" | "toot" | "chime" | "dig" | "treat" | "alert" | "step" | "win-game";
 
 const FILES: Record<SfxKey, string> = {
   bark: "/assets/audio/bark.mp3",
@@ -10,6 +10,7 @@ const FILES: Record<SfxKey, string> = {
   treat: "/assets/audio/treat-eat.mp3",
   alert: "/assets/audio/alert.mp3",
   step: "/assets/audio/step.mp3",
+  "win-game": "/assets/audio/win-game.mp3",
 };
 
 export function preloadSfx(scene: Phaser.Scene) {

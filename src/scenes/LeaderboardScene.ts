@@ -1,6 +1,7 @@
 import Phaser from "phaser";
 import { GAME_W, GAME_H } from "../config";
 import { fetchTop, submitScore, type LeaderboardEntry } from "../score/globalScores";
+import { play } from "../audio/sfx";
 
 export class LeaderboardScene extends Phaser.Scene {
   private name = "";
@@ -13,6 +14,7 @@ export class LeaderboardScene extends Phaser.Scene {
 
   create(data: { totalScore?: number }) {
     this.finalScore = data.totalScore ?? 0;
+    play(this, "win-game", 0.8);
 
     // Ghost-with-cake background, dimmed so foreground text stays legible.
     const bg = this.add.image(GAME_W / 2, GAME_H / 2, "win-bg").setOrigin(0.5);
