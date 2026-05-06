@@ -20,5 +20,11 @@ export function preloadSfx(scene: Phaser.Scene) {
 
 export function play(scene: Phaser.Scene, key: SfxKey, volume = 0.6) {
   if (!scene.sound) return;
-  scene.sound.play(`sfx-${key}`, { volume });
+  const cacheKey = `sfx-${key}`;
+  if (!scene.cache.audio.exists(cacheKey)) return;
+  try {
+    scene.sound.play(cacheKey, { volume });
+  } catch {
+    // Asset failed to decode; ignore so gameplay continues.
+  }
 }
