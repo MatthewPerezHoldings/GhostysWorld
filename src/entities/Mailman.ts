@@ -7,10 +7,9 @@ export const MAILMAN_SNEAK_SPEED = 55;
 
 export class Mailman extends Phaser.Physics.Arcade.Sprite {
   constructor(scene: Phaser.Scene, x: number, y: number) {
-    super(scene, x, y, "placeholder");
+    super(scene, x, y, "mailman");
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setTint(0x2266dd);
     this.setDisplaySize(TILE_SIZE * 0.8, TILE_SIZE * 0.8);
     this.body!.setSize(TILE_SIZE * 0.6, TILE_SIZE * 0.6);
     this.setCollideWorldBounds(true);

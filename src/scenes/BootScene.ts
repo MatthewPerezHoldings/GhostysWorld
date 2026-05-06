@@ -8,6 +8,8 @@ export class BootScene extends Phaser.Scene {
 
   preload() {
     this.load.image("placeholder", "/assets/placeholder.png");
+    this.load.image("mailman", "/assets/sprites/mailman.png");
+    this.load.image("ghost", "/assets/sprites/ghost.png");
     preloadSfx(this);
   }
 

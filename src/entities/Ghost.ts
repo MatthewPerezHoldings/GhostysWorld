@@ -28,10 +28,9 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
   private readonly cfg: Required<GhostConfig>;
 
   constructor(scene: Phaser.Scene, x: number, y: number, cfg: GhostConfig) {
-    super(scene, x, y, "placeholder");
+    super(scene, x, y, "ghost");
     scene.add.existing(this);
     scene.physics.add.existing(this);
-    this.setTint(0x999999);
     this.setDisplaySize(TILE_SIZE, TILE_SIZE * 1.4);
     this.body!.setSize(TILE_SIZE * 0.7, TILE_SIZE * 0.9);
     this.cfg = {
