@@ -25,11 +25,12 @@ export class TouchInput {
     const w = scene.cameras.main.width;
     const h = scene.cameras.main.height;
 
-    // Action buttons in a vertical stack on the left, bottom→top:
-    // steak → squirrel → turtle. Sneak sits above the column.
-    const colX = 70;
-    const bottomY = h - 60;
-    const spacing = 90;
+    // Action buttons stacked on the left, bottom→top: steak → squirrel
+    // → turtle → sneak. Bottom button sits 110px above canvas bottom
+    // so the iPhone home-indicator gesture zone can't intercept taps.
+    const colX = 75;
+    const bottomY = h - 110;
+    const spacing = 95;
     this.makeButton(scene, colX, bottomY,                "🥩", () => this.press(this.treat),    () => this.release(this.treat));
     this.makeButton(scene, colX, bottomY - spacing,      "🐿️", () => this.press(this.squirrel), () => this.release(this.squirrel));
     this.makeButton(scene, colX, bottomY - spacing * 2,  "🐢", () => this.press(this.turtle),   () => this.release(this.turtle));
@@ -88,9 +89,11 @@ export class TouchInput {
     scene: Phaser.Scene, x: number, y: number, label: string,
     onDown: () => void, onUp: () => void,
   ) {
-    const r = 42;
-    const btn = scene.add.circle(x, y, r, 0xffffff, 0.22).setScrollFactor(0).setDepth(900).setInteractive();
-    scene.add.text(x, y, label, { fontSize: "34px", color: "#ffffff" })
+    const r = 50;
+    const btn = scene.add.circle(x, y, r, 0xffffff, 0.25).setScrollFactor(0).setDepth(900);
+    // Hit area 20% larger than the visual — gives the thumb some forgiveness.
+    btn.setInteractive(new Phaser.Geom.Circle(r, r, r * 1.2), Phaser.Geom.Circle.Contains);
+    scene.add.text(x, y, label, { fontSize: "40px", color: "#ffffff" })
       .setOrigin(0.5).setScrollFactor(0).setDepth(901);
     btn.on("pointerdown", onDown);
     btn.on("pointerup", onUp);
