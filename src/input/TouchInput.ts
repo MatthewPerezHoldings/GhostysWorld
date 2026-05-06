@@ -25,13 +25,15 @@ export class TouchInput {
     const w = scene.cameras.main.width;
     const h = scene.cameras.main.height;
 
-    // Action buttons clustered bottom-left for the off-thumb.
-    const baseX = 80;
-    const baseY = h - 80;
-    this.makeButton(scene, baseX,      baseY - 140, "S",  () => { this.sneak = true; },        () => { this.sneak = false; });
-    this.makeButton(scene, baseX,      baseY - 70,  "🐿️", () => this.press(this.squirrel),     () => this.release(this.squirrel));
-    this.makeButton(scene, baseX,      baseY,       "🐢", () => this.press(this.turtle),       () => this.release(this.turtle));
-    this.makeButton(scene, baseX + 70, baseY,       "🥩", () => this.press(this.treat),        () => this.release(this.treat));
+    // Action buttons in a vertical stack on the left, bottom→top:
+    // steak → squirrel → turtle. Sneak sits above the column.
+    const colX = 70;
+    const bottomY = h - 60;
+    const spacing = 90;
+    this.makeButton(scene, colX, bottomY,                "🥩", () => this.press(this.treat),    () => this.release(this.treat));
+    this.makeButton(scene, colX, bottomY - spacing,      "🐿️", () => this.press(this.squirrel), () => this.release(this.squirrel));
+    this.makeButton(scene, colX, bottomY - spacing * 2,  "🐢", () => this.press(this.turtle),   () => this.release(this.turtle));
+    this.makeButton(scene, colX, bottomY - spacing * 3,  "S",  () => { this.sneak = true; },    () => { this.sneak = false; });
 
     // Free-thumb joystick: tap anywhere in the right half to spawn the stick;
     // the tap point becomes the center, drag from there controls movement.
@@ -86,9 +88,9 @@ export class TouchInput {
     scene: Phaser.Scene, x: number, y: number, label: string,
     onDown: () => void, onUp: () => void,
   ) {
-    const r = 32;
+    const r = 42;
     const btn = scene.add.circle(x, y, r, 0xffffff, 0.22).setScrollFactor(0).setDepth(900).setInteractive();
-    scene.add.text(x, y, label, { fontSize: "26px", color: "#ffffff" })
+    scene.add.text(x, y, label, { fontSize: "34px", color: "#ffffff" })
       .setOrigin(0.5).setScrollFactor(0).setDepth(901);
     btn.on("pointerdown", onDown);
     btn.on("pointerup", onUp);
