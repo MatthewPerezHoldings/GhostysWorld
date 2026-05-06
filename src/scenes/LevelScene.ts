@@ -7,6 +7,7 @@ import { Poppy } from "../entities/Poppy";
 import { KeyboardInput } from "../input/KeyboardInput";
 import { Pickup } from "../entities/Pickup";
 import { LEVELS } from "../levels/levels";
+import { Hud } from "../ui/Hud";
 
 export class LevelScene extends Phaser.Scene {
   private mailman!: Mailman;
@@ -31,6 +32,7 @@ export class LevelScene extends Phaser.Scene {
   private won = false;
   private livesRemaining = 3;
   private runScore = 0;
+  private hud!: Hud;
 
   constructor() {
     super("Level");
@@ -57,6 +59,8 @@ export class LevelScene extends Phaser.Scene {
   create() {
     this.drawTiles();
     this.buildFenceColliders();
+
+    this.hud = new Hud(this);
 
     const spawnX = GATE_COL * TILE_SIZE + TILE_SIZE / 2;
     const spawnY = 0 * TILE_SIZE + TILE_SIZE / 2;
@@ -158,6 +162,17 @@ export class LevelScene extends Phaser.Scene {
 
     this.levelTimeSec += deltaSec;
     if (!this.won) this.checkWin();
+
+    this.hud.set({
+      levelIndex: this.levelIndex,
+      lives: this.livesRemaining,
+      treats: this.treatsLeft,
+      squirrelCalls: this.squirrelCallsLeft,
+      hasTurtle: this.hasTurtle,
+      approachActive: this.approachActive,
+      approachRemaining: Math.max(0, this.approachLimitSec - this.approachElapsed),
+      levelTime: this.levelTimeSec,
+    });
   }
 
   private checkHoleTrips() {
