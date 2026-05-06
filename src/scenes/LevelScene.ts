@@ -5,6 +5,7 @@ import { Mailman } from "../entities/Mailman";
 import { Ghost } from "../entities/Ghost";
 import { Poppy } from "../entities/Poppy";
 import { KeyboardInput } from "../input/KeyboardInput";
+import { Pickup } from "../entities/Pickup";
 
 export class LevelScene extends Phaser.Scene {
   private mailman!: Mailman;
@@ -15,6 +16,11 @@ export class LevelScene extends Phaser.Scene {
   private keyboard!: KeyboardInput;
   private fenceGroup!: Phaser.Physics.Arcade.StaticGroup;
   private elapsedSec = 0;
+  private pickups: Pickup[] = [];
+  private treatsLeft = 3;
+  private squirrelCallsLeft = 2;
+  private hasTurtle = false;
+  private turtleSpawn?: Pickup;
 
   constructor() {
     super("Level");
@@ -56,6 +62,14 @@ export class LevelScene extends Phaser.Scene {
     this.holeGraphics = this.add.graphics();
 
     this.keyboard = new KeyboardInput(this);
+
+    // (Turtle spawn is gated on level config in Task 16; for now always spawn one in mid-yard.)
+    this.turtleSpawn = new Pickup(this, TILE_SIZE * 12, TILE_SIZE * 9, "turtle");
+    this.physics.add.overlap(this.mailman, this.turtleSpawn, () => {
+      this.hasTurtle = true;
+      this.turtleSpawn?.destroy();
+      this.turtleSpawn = undefined;
+    });
   }
 
   update(_time: number, deltaMs: number) {
@@ -68,6 +82,22 @@ export class LevelScene extends Phaser.Scene {
     } else {
       this.mailman.applyIntent(intent);
     }
+
+    if (intent.dropTreat && this.treatsLeft > 0) {
+      this.treatsLeft--;
+      this.dropPickup("treat", this.mailman.x, this.mailman.y);
+    }
+    if (intent.squirrelCall && this.squirrelCallsLeft > 0) {
+      this.squirrelCallsLeft--;
+      this.dropPickup("squirrel", this.mailman.x + 60, this.mailman.y);
+    }
+    if (intent.dropTurtle && this.hasTurtle) {
+      this.hasTurtle = false;
+      this.dropPickup("turtle", this.mailman.x, this.mailman.y);
+    }
+
+    // Pickup effects: when a dog overlaps a pickup, apply its distraction.
+    this.applyPickupEffects();
 
     const mpos = { x: this.mailman.x, y: this.mailman.y };
     this.ghost.update(deltaSec, mpos, this.elapsedSec);
@@ -93,6 +123,40 @@ export class LevelScene extends Phaser.Scene {
     this.holeGraphics.fillStyle(0x2a1a0a, 1);
     for (const h of this.poppy.holes) {
       this.holeGraphics.fillCircle(h.x, h.y, TILE_SIZE * 0.35);
+    }
+  }
+
+  private dropPickup(kind: "treat" | "squirrel" | "turtle", x: number, y: number) {
+    const p = new Pickup(this, x, y, kind);
+    this.pickups.push(p);
+  }
+
+  private applyPickupEffects() {
+    // Iterate in reverse so we can splice
+    for (let i = this.pickups.length - 1; i >= 0; i--) {
+      const p = this.pickups[i]!;
+      const dGhost = Phaser.Math.Distance.Between(p.x, p.y, this.ghost.x, this.ghost.y);
+      const dPoppy = Phaser.Math.Distance.Between(p.x, p.y, this.poppy.x, this.poppy.y);
+
+      if (p.kind === "treat" && dGhost < TILE_SIZE) {
+        this.ghost.distract(1.0, this.elapsedSec);
+        p.destroy();
+        this.pickups.splice(i, 1);
+      } else if (p.kind === "squirrel" && dPoppy < TILE_SIZE * 4) {
+        this.poppy.distract(3.0, this.elapsedSec);
+        p.destroy();
+        this.pickups.splice(i, 1);
+      } else if (p.kind === "turtle") {
+        // Turtle distracts BOTH dogs in 3-tile radius for 3s
+        if (dGhost < TILE_SIZE * 3) this.ghost.distract(3.0, this.elapsedSec);
+        if (dPoppy < TILE_SIZE * 3) this.poppy.distract(3.0, this.elapsedSec);
+        // Turtle remains for 3 sec then despawns
+        if (!p.getData("placedAt")) p.setData("placedAt", this.elapsedSec);
+        if (this.elapsedSec - (p.getData("placedAt") as number) > 3) {
+          p.destroy();
+          this.pickups.splice(i, 1);
+        }
+      }
     }
   }
 
