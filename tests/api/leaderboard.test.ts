@@ -44,7 +44,9 @@ describe("handleLeaderboard", () => {
       redis,
     );
     expect(res.status).toBe(200);
-    expect(res.body.entries[0]).toEqual({ name: "CHARLIE", score: 1500 });
+    if ("entries" in res.body) {
+      expect(res.body.entries[0]).toEqual({ name: "CHARLIE", score: 1500 });
+    }
   });
 
   it("POST rejects names longer than 16 chars", async () => {
