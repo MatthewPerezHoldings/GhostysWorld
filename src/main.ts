@@ -13,6 +13,7 @@ new Phaser.Game({
   height: GAME_H,
   backgroundColor: "#000000",
   physics: { default: "arcade", arcade: { debug: false } },
+  input: { activePointers: 3 }, // multi-touch: free-thumb joystick + button presses
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
   scene: [BootScene, TitleScene, LevelScene, GameOverScene, LeaderboardScene],
 });
