@@ -6,6 +6,7 @@ import { Ghost } from "../entities/Ghost";
 import { Poppy } from "../entities/Poppy";
 import { KeyboardInput } from "../input/KeyboardInput";
 import { Pickup } from "../entities/Pickup";
+import { LEVELS } from "../levels/levels";
 
 export class LevelScene extends Phaser.Scene {
   private mailman!: Mailman;
@@ -29,23 +30,28 @@ export class LevelScene extends Phaser.Scene {
   private levelTimeSec = 0;
   private won = false;
   private livesRemaining = 3;
+  private runScore = 0;
 
   constructor() {
     super("Level");
   }
 
-  init(data: { levelIndex?: number; livesRemaining?: number }) {
+  init(data: { levelIndex?: number; livesRemaining?: number; runScore?: number }) {
     this.levelIndex = data.levelIndex ?? 0;
     this.livesRemaining = data.livesRemaining ?? 3;
+    this.runScore = data.runScore ?? 0;
     this.elapsedSec = 0;
     this.levelTimeSec = 0;
     this.won = false;
     this.approachActive = true;
     this.approachElapsed = 0;
-    this.treatsLeft = 3;
-    this.squirrelCallsLeft = 2;
-    this.hasTurtle = false;
     this.pickups = [];
+
+    const cfg = LEVELS[this.levelIndex]!;
+    this.approachLimitSec = cfg.approachLimitSec;
+    this.treatsLeft = cfg.treats;
+    this.squirrelCallsLeft = cfg.squirrelCalls;
+    this.hasTurtle = false;
   }
 
   create() {
@@ -57,13 +63,19 @@ export class LevelScene extends Phaser.Scene {
     this.mailman = new Mailman(this, spawnX, spawnY);
     this.physics.add.collider(this.mailman, this.fenceGroup);
 
-    this.ghost = new Ghost(this, TILE_SIZE * 12, TILE_SIZE * 8, {
-      patrol: [
-        { x: TILE_SIZE * 6, y: TILE_SIZE * 8 },
-        { x: TILE_SIZE * 12, y: TILE_SIZE * 6 },
-        { x: TILE_SIZE * 18, y: TILE_SIZE * 8 },
-        { x: TILE_SIZE * 12, y: TILE_SIZE * 12 },
-      ],
+    const cfg = LEVELS[this.levelIndex]!;
+
+    this.ghost = new Ghost(this, TILE_SIZE * 14, TILE_SIZE * 16, {
+      patrol: cfg.ghostAsleepOnPorch
+        ? [{ x: TILE_SIZE * 14, y: TILE_SIZE * 16 }]
+        : [
+            { x: TILE_SIZE * 6, y: TILE_SIZE * 8 },
+            { x: TILE_SIZE * 12, y: TILE_SIZE * 6 },
+            { x: TILE_SIZE * 18, y: TILE_SIZE * 8 },
+            { x: TILE_SIZE * 12, y: TILE_SIZE * 12 },
+          ],
+      sightRangeMultiplier: cfg.ghostSightMultiplier,
+      speedMultiplier: cfg.ghostSpeedMultiplier,
     });
     this.physics.add.collider(this.ghost, this.fenceGroup);
 
@@ -76,7 +88,7 @@ export class LevelScene extends Phaser.Scene {
         { x: TILE_SIZE * 20, y: TILE_SIZE * 13 },
         { x: TILE_SIZE * 4, y: TILE_SIZE * 13 },
       ],
-      holesPerLevel: 1,
+      holesPerLevel: cfg.poppyHoles,
     });
     this.physics.add.collider(this.poppy, this.fenceGroup);
     this.physics.add.overlap(this.mailman, this.poppy, () => this.onCaught());
@@ -85,13 +97,14 @@ export class LevelScene extends Phaser.Scene {
 
     this.keyboard = new KeyboardInput(this);
 
-    // (Turtle spawn is gated on level config in Task 16; for now always spawn one in mid-yard.)
-    this.turtleSpawn = new Pickup(this, TILE_SIZE * 12, TILE_SIZE * 9, "turtle");
-    this.physics.add.overlap(this.mailman, this.turtleSpawn, () => {
-      this.hasTurtle = true;
-      this.turtleSpawn?.destroy();
-      this.turtleSpawn = undefined;
-    });
+    if (cfg.hasTurtlePickup) {
+      this.turtleSpawn = new Pickup(this, TILE_SIZE * 12, TILE_SIZE * 9, "turtle");
+      this.physics.add.overlap(this.mailman, this.turtleSpawn, () => {
+        this.hasTurtle = true;
+        this.turtleSpawn?.destroy();
+        this.turtleSpawn = undefined;
+      });
+    }
   }
 
   update(_time: number, deltaMs: number) {
@@ -250,7 +263,7 @@ export class LevelScene extends Phaser.Scene {
       this.scene.start("GameOver");
       return;
     }
-    this.scene.restart({ levelIndex: this.levelIndex, livesRemaining: this.livesRemaining });
+    this.scene.restart({ levelIndex: this.levelIndex, livesRemaining: this.livesRemaining, runScore: this.runScore });
   }
 
   private drawTiles() {
@@ -289,11 +302,21 @@ export class LevelScene extends Phaser.Scene {
     const row = Math.floor(this.mailman.y / TILE_SIZE);
     if (col === DOOR_COL && row === DOOR_ROW) {
       this.won = true;
-      this.events.emit("levelComplete", {
-        levelIndex: this.levelIndex,
-        timeSec: this.levelTimeSec,
-      });
-      this.scene.pause();
+      const cfg = LEVELS[this.levelIndex]!;
+      const timeBonus = Math.max(0, Math.floor((cfg.approachLimitSec - this.levelTimeSec) * 50));
+      const livesBonus = 1000 * this.livesRemaining;
+      const levelScore = timeBonus + livesBonus;
+      const newRunScore = this.runScore + levelScore;
+
+      if (this.levelIndex >= LEVELS.length - 1) {
+        this.scene.start("Leaderboard", { totalScore: newRunScore });
+      } else {
+        this.scene.restart({
+          levelIndex: this.levelIndex + 1,
+          livesRemaining: this.livesRemaining,
+          runScore: newRunScore,
+        });
+      }
     }
   }
 }

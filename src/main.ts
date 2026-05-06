@@ -4,6 +4,7 @@ import { BootScene } from "./scenes/BootScene";
 import { TitleScene } from "./scenes/TitleScene";
 import { LevelScene } from "./scenes/LevelScene";
 import { GameOverScene } from "./scenes/GameOverScene";
+import { LeaderboardScene } from "./scenes/LeaderboardScene";
 
 new Phaser.Game({
   type: Phaser.AUTO,
@@ -13,5 +14,5 @@ new Phaser.Game({
   backgroundColor: "#000000",
   physics: { default: "arcade", arcade: { debug: false } },
   scale: { mode: Phaser.Scale.FIT, autoCenter: Phaser.Scale.CENTER_BOTH },
-  scene: [BootScene, TitleScene, LevelScene, GameOverScene],
+  scene: [BootScene, TitleScene, LevelScene, GameOverScene, LeaderboardScene],
 });
