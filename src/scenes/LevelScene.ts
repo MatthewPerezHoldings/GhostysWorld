@@ -3,11 +3,15 @@ import { TILE_SIZE, YARD_TILES_W, YARD_TILES_H } from "../config";
 import { getTile, TILE_COLORS, isWalkable, GATE_COL } from "../levels/yardLayout";
 import { Mailman } from "../entities/Mailman";
 import { Ghost } from "../entities/Ghost";
+import { Poppy } from "../entities/Poppy";
 import { KeyboardInput } from "../input/KeyboardInput";
 
 export class LevelScene extends Phaser.Scene {
   private mailman!: Mailman;
   private ghost!: Ghost;
+  private poppy!: Poppy;
+  private holeGraphics!: Phaser.GameObjects.Graphics;
+  private mailmanFrozenUntil = 0;
   private keyboard!: KeyboardInput;
   private fenceGroup!: Phaser.Physics.Arcade.StaticGroup;
   private elapsedSec = 0;
@@ -37,14 +41,59 @@ export class LevelScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.mailman, this.ghost, () => this.onCaught());
 
+    this.poppy = new Poppy(this, TILE_SIZE * 6, TILE_SIZE * 6, {
+      patrol: [
+        { x: TILE_SIZE * 4, y: TILE_SIZE * 5 },
+        { x: TILE_SIZE * 20, y: TILE_SIZE * 5 },
+        { x: TILE_SIZE * 20, y: TILE_SIZE * 13 },
+        { x: TILE_SIZE * 4, y: TILE_SIZE * 13 },
+      ],
+      holesPerLevel: 1,
+    });
+    this.physics.add.collider(this.poppy, this.fenceGroup);
+    this.physics.add.overlap(this.mailman, this.poppy, () => this.onCaught());
+
+    this.holeGraphics = this.add.graphics();
+
     this.keyboard = new KeyboardInput(this);
   }
 
   update(_time: number, deltaMs: number) {
     const deltaSec = deltaMs / 1000;
     this.elapsedSec += deltaSec;
-    this.mailman.applyIntent(this.keyboard.read());
-    this.ghost.update(deltaSec, { x: this.mailman.x, y: this.mailman.y }, this.elapsedSec);
+
+    const intent = this.keyboard.read();
+    if (this.elapsedSec < this.mailmanFrozenUntil) {
+      this.mailman.setVelocity(0, 0);
+    } else {
+      this.mailman.applyIntent(intent);
+    }
+
+    const mpos = { x: this.mailman.x, y: this.mailman.y };
+    this.ghost.update(deltaSec, mpos, this.elapsedSec);
+    this.poppy.update(deltaSec, mpos, { x: this.ghost.x, y: this.ghost.y }, this.elapsedSec);
+
+    this.checkHoleTrips();
+    this.renderHoles();
+  }
+
+  private checkHoleTrips() {
+    if (this.elapsedSec < this.mailmanFrozenUntil) return;
+    for (const h of this.poppy.holes) {
+      const d = Phaser.Math.Distance.Between(h.x, h.y, this.mailman.x, this.mailman.y);
+      if (d < TILE_SIZE * 0.4) {
+        this.mailmanFrozenUntil = this.elapsedSec + 1; // 1 sec frozen
+        return;
+      }
+    }
+  }
+
+  private renderHoles() {
+    this.holeGraphics.clear();
+    this.holeGraphics.fillStyle(0x2a1a0a, 1);
+    for (const h of this.poppy.holes) {
+      this.holeGraphics.fillCircle(h.x, h.y, TILE_SIZE * 0.35);
+    }
   }
 
   private onCaught() {
