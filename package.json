@@ -24,6 +24,7 @@
     "vitest": "^4.1.5"
   },
   "dependencies": {
+    "@upstash/redis": "^1.38.0",
     "phaser": "^3.90.0"
   }
 }
