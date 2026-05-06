@@ -17,7 +17,7 @@ export const YARD_LAYOUT: readonly string[] = [
   "FGGGGGGGGGGGGGGGGGGGGGGGF", // 13
   "FGGGGGGGGGGGGGGGGGGGGGGGF", // 14
   "FGGGGGGGGGGGGPPPPPGGGGGGF", // 15  porch
-  "FGGGGGGGGGGGGPPDPPGGGGGGF", // 16  door at col 14
+  "FGGGGGGGGGGGGPPDPPGGGGGGF", // 16  door at col 15
   "FFFFFFFFFFFFFFFFFFFFFFFFF", // 17  back fence
 ];
 
@@ -32,7 +32,7 @@ export const TILE_COLORS: Record<string, number> = {
 
 export const GATE_COL = 12;
 export const GATE_ROW = 1;
-export const DOOR_COL = 14;
+export const DOOR_COL = 15;
 export const DOOR_ROW = 16;
 
 export function getTile(col: number, row: number): string {
