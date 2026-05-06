@@ -22,6 +22,9 @@ export class LevelScene extends Phaser.Scene {
   private hasTurtle = false;
   private turtleSpawn?: Pickup;
   private nextTootAt = 0;
+  private approachActive = true;
+  private approachElapsed = 0;
+  private approachLimitSec = 25; // overridden by level config in Task 16
 
   constructor() {
     super("Level");
@@ -76,6 +79,18 @@ export class LevelScene extends Phaser.Scene {
   update(_time: number, deltaMs: number) {
     const deltaSec = deltaMs / 1000;
     this.elapsedSec += deltaSec;
+
+    if (this.approachActive) {
+      this.approachElapsed += deltaSec;
+      // Crossing the gate row deactivates the approach phase
+      if (this.mailman.y > TILE_SIZE * 1.5) {
+        this.approachActive = false;
+      }
+      if (this.approachElapsed >= this.approachLimitSec) {
+        this.onApproachTimeout();
+        return;
+      }
+    }
 
     const intent = this.keyboard.read();
     if (this.elapsedSec < this.mailmanFrozenUntil) {
@@ -201,12 +216,22 @@ export class LevelScene extends Phaser.Scene {
     this.ghost.distract(0.5, this.elapsedSec);
   }
 
+  private onApproachTimeout() {
+    // Vault rush: both dogs sprint to the mailman
+    this.ghost.setPosition(this.mailman.x, this.mailman.y);
+    this.poppy.setPosition(this.mailman.x, this.mailman.y);
+    this.onCaught();
+    this.approachActive = false;
+    this.approachElapsed = 0;
+  }
+
   private onCaught() {
-    // For now: respawn mailman at the gate. Lives & game-over come in Task 15.
     const spawnX = GATE_COL * TILE_SIZE + TILE_SIZE / 2;
     const spawnY = 0 * TILE_SIZE + TILE_SIZE / 2;
     this.mailman.setPosition(spawnX, spawnY);
     this.mailman.setVelocity(0, 0);
+    this.approachActive = true;
+    this.approachElapsed = 0;
   }
 
   private drawTiles() {
