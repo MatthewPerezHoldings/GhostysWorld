@@ -7,8 +7,34 @@
     <meta name="mobile-web-app-capable" content="yes" />
     <title>Ghosty's World</title>
     <style>
-      html, body { margin: 0; padding: 0; height: 100%; background: #111; overflow: hidden; }
-      #game { display: flex; align-items: center; justify-content: center; height: 100vh; touch-action: none; }
+      html, body {
+        margin: 0;
+        padding: 0;
+        height: 100%;
+        background: #111;
+        overflow: hidden;
+        overscroll-behavior: none;
+        -webkit-tap-highlight-color: transparent;
+      }
+      /* Lock to the *visible* viewport so iOS Safari's URL bar / bottom
+         toolbar can't clip the canvas. dvh is the small-viewport unit
+         that excludes browser chrome (iOS 16+, Android 13+ Chrome).
+         Falls back to vh on older browsers. */
+      #game {
+        position: fixed;
+        inset: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        height: 100vh;
+        height: 100dvh;
+        touch-action: none;
+        padding-top: env(safe-area-inset-top);
+        padding-bottom: env(safe-area-inset-bottom);
+        padding-left: env(safe-area-inset-left);
+        padding-right: env(safe-area-inset-right);
+        box-sizing: border-box;
+      }
 
       /* Portrait rotate prompt — shown only on touch + portrait. */
       #rotate-prompt {
