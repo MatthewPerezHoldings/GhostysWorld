@@ -28,13 +28,15 @@ export class LevelScene extends Phaser.Scene {
   private levelIndex = 0;
   private levelTimeSec = 0;
   private won = false;
+  private livesRemaining = 3;
 
   constructor() {
     super("Level");
   }
 
-  init(data: { levelIndex?: number }) {
+  init(data: { levelIndex?: number; livesRemaining?: number }) {
     this.levelIndex = data.levelIndex ?? 0;
+    this.livesRemaining = data.livesRemaining ?? 3;
     this.elapsedSec = 0;
     this.levelTimeSec = 0;
     this.won = false;
@@ -240,17 +242,15 @@ export class LevelScene extends Phaser.Scene {
     this.ghost.setPosition(this.mailman.x, this.mailman.y);
     this.poppy.setPosition(this.mailman.x, this.mailman.y);
     this.onCaught();
-    this.approachActive = false;
-    this.approachElapsed = 0;
   }
 
   private onCaught() {
-    const spawnX = GATE_COL * TILE_SIZE + TILE_SIZE / 2;
-    const spawnY = 0 * TILE_SIZE + TILE_SIZE / 2;
-    this.mailman.setPosition(spawnX, spawnY);
-    this.mailman.setVelocity(0, 0);
-    this.approachActive = true;
-    this.approachElapsed = 0;
+    this.livesRemaining--;
+    if (this.livesRemaining <= 0) {
+      this.scene.start("GameOver");
+      return;
+    }
+    this.scene.restart({ levelIndex: this.levelIndex, livesRemaining: this.livesRemaining });
   }
 
   private drawTiles() {
