@@ -28,6 +28,7 @@ export class LevelScene extends Phaser.Scene {
   private squirrelCallsLeft = 2;
   private hasTurtle = false;
   private turtleSpawn?: Pickup;
+  private nokia?: Phaser.GameObjects.Image;
   private nextTootAt = 0;
   private approachActive = true;
   private approachElapsed = 0;
@@ -116,6 +117,12 @@ export class LevelScene extends Phaser.Scene {
         this.turtleSpawn = undefined;
       });
     }
+
+    if (cfg.hasNokia) {
+      this.nokia = this.add.image(TILE_SIZE * 15, TILE_SIZE * 10, "nokia")
+        .setDisplaySize(TILE_SIZE * 1.1, TILE_SIZE * 0.9)
+        .setDepth(50);
+    }
   }
 
   update(_time: number, deltaMs: number) {
@@ -165,6 +172,7 @@ export class LevelScene extends Phaser.Scene {
 
     // Pickup effects: when a dog overlaps a pickup, apply its distraction.
     this.applyPickupEffects();
+    this.applyNokiaDistraction();
 
     const mpos = { x: this.mailman.x, y: this.mailman.y };
     this.ghost.update(deltaSec, mpos, this.elapsedSec);
@@ -213,6 +221,22 @@ export class LevelScene extends Phaser.Scene {
   private dropPickup(kind: "treat" | "squirrel" | "turtle", x: number, y: number) {
     const p = new Pickup(this, x, y, kind);
     this.pickups.push(p);
+  }
+
+  // Nokia is a passive distractor: dogs that wander within 2.5 tiles
+  // freeze for 2 sec. Only fires when a dog is *not already* distracted
+  // so she can't stack-lock them indefinitely.
+  private applyNokiaDistraction() {
+    if (!this.nokia) return;
+    const radius = TILE_SIZE * 2.5;
+    const dGhost = Phaser.Math.Distance.Between(this.nokia.x, this.nokia.y, this.ghost.x, this.ghost.y);
+    if (dGhost < radius && this.ghost.currentState !== "DISTRACTED") {
+      this.ghost.distract(2.0, this.elapsedSec);
+    }
+    const dPoppy = Phaser.Math.Distance.Between(this.nokia.x, this.nokia.y, this.poppy.x, this.poppy.y);
+    if (dPoppy < radius && this.poppy.currentState !== "DISTRACTED") {
+      this.poppy.distract(2.0, this.elapsedSec);
+    }
   }
 
   private applyPickupEffects() {
