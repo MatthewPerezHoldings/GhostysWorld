@@ -63,6 +63,24 @@ export class Poppy extends Phaser.Physics.Arcade.Sprite {
     this.fsm.transition("DISTRACTED");
   }
 
+  /** Pre-spawn N holes silently at level start. Caps Poppy's during-play
+   * digging since holesDug starts at this count. */
+  seedHoles(count: number) {
+    for (let i = 0; i < count; i++) {
+      for (let attempts = 0; attempts < 30; attempts++) {
+        const col = Phaser.Math.Between(2, YARD_TILES_W - 3);
+        const row = Phaser.Math.Between(3, YARD_TILES_H - 3);
+        if (!isWalkable(col, row)) continue;
+        this.holes.push({
+          x: col * TILE_SIZE + TILE_SIZE / 2,
+          y: row * TILE_SIZE + TILE_SIZE / 2,
+        });
+        this.holesDug++;
+        break;
+      }
+    }
+  }
+
   update(deltaSec: number, mailmanPos: Vec2, ghostPos: Vec2, now: number) {
     this.cachedGhostPos = ghostPos;
     this.fsm.tick(deltaSec);

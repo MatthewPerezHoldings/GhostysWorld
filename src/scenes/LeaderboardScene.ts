@@ -13,6 +13,12 @@ export class LeaderboardScene extends Phaser.Scene {
 
   create(data: { totalScore?: number }) {
     this.finalScore = data.totalScore ?? 0;
+
+    // Ghost-with-cake background, dimmed so foreground text stays legible.
+    const bg = this.add.image(GAME_W / 2, GAME_H / 2, "win-bg").setOrigin(0.5);
+    const scale = Math.max(GAME_W / bg.width, GAME_H / bg.height);
+    bg.setScale(scale).setAlpha(0.35);
+
     this.add.text(GAME_W / 2, 60, "YOU WIN", { fontFamily: "monospace", fontSize: "40px", color: "#ffff66" }).setOrigin(0.5);
     this.add.text(GAME_W / 2, 110, `Score: ${this.finalScore}`, { fontFamily: "monospace", fontSize: "20px", color: "#ffffff" }).setOrigin(0.5);
 

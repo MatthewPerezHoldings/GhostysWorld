@@ -99,6 +99,7 @@ export class LevelScene extends Phaser.Scene {
       ],
       holesPerLevel: cfg.poppyHoles,
     });
+    this.poppy.seedHoles(cfg.poppyHoles);
     this.physics.add.collider(this.poppy, this.fenceGroup);
     this.physics.add.overlap(this.mailman, this.poppy, () => this.onCaught());
 
