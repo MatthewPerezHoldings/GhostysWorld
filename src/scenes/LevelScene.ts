@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import { TILE_SIZE, YARD_TILES_W, YARD_TILES_H } from "../config";
-import { getTile, TILE_COLORS, isWalkable, GATE_COL } from "../levels/yardLayout";
+import { getTile, TILE_COLORS, isWalkable, GATE_COL, DOOR_COL, DOOR_ROW } from "../levels/yardLayout";
 import { Mailman } from "../entities/Mailman";
 import { Ghost } from "../entities/Ghost";
 import { Poppy } from "../entities/Poppy";
@@ -25,9 +25,25 @@ export class LevelScene extends Phaser.Scene {
   private approachActive = true;
   private approachElapsed = 0;
   private approachLimitSec = 25; // overridden by level config in Task 16
+  private levelIndex = 0;
+  private levelTimeSec = 0;
+  private won = false;
 
   constructor() {
     super("Level");
+  }
+
+  init(data: { levelIndex?: number }) {
+    this.levelIndex = data.levelIndex ?? 0;
+    this.elapsedSec = 0;
+    this.levelTimeSec = 0;
+    this.won = false;
+    this.approachActive = true;
+    this.approachElapsed = 0;
+    this.treatsLeft = 3;
+    this.squirrelCallsLeft = 2;
+    this.hasTurtle = false;
+    this.pickups = [];
   }
 
   create() {
@@ -124,6 +140,9 @@ export class LevelScene extends Phaser.Scene {
 
     this.checkHoleTrips();
     this.renderHoles();
+
+    this.levelTimeSec += deltaSec;
+    if (!this.won) this.checkWin();
   }
 
   private checkHoleTrips() {
@@ -262,6 +281,19 @@ export class LevelScene extends Phaser.Scene {
           this.fenceGroup.add(block);
         }
       }
+    }
+  }
+
+  private checkWin() {
+    const col = Math.floor(this.mailman.x / TILE_SIZE);
+    const row = Math.floor(this.mailman.y / TILE_SIZE);
+    if (col === DOOR_COL && row === DOOR_ROW) {
+      this.won = true;
+      this.events.emit("levelComplete", {
+        levelIndex: this.levelIndex,
+        timeSec: this.levelTimeSec,
+      });
+      this.scene.pause();
     }
   }
 }
