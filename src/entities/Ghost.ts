@@ -3,6 +3,7 @@ import { TILE_SIZE } from "../config";
 import { DogStateMachine } from "../ai/DogStateMachine";
 import { isInSightCone, type Vec2 } from "../ai/SightCone";
 import { positionOnPatrol } from "../ai/Patrol";
+import { play } from "../audio/sfx";
 
 export type GhostState = "IDLE" | "ALERT" | "CHASE" | "DISTRACTED";
 
@@ -23,6 +24,7 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
   private patrolElapsed = 0;
   private facing: Vec2 = { x: 1, y: 0 };
   private distractedUntil = 0;
+  private nextStepAt = 0;
   private readonly cfg: Required<GhostConfig>;
 
   constructor(scene: Phaser.Scene, x: number, y: number, cfg: GhostConfig) {
@@ -105,6 +107,11 @@ export class Ghost extends Phaser.Physics.Arcade.Sprite {
   }
 
   private tickChase(target: Vec2) {
+    const now = this.scene.time.now;
+    if (now >= this.nextStepAt) {
+      play(this.scene, "step", 0.3);
+      this.nextStepAt = now + 350;
+    }
     const dx = target.x - this.x;
     const dy = target.y - this.y;
     const mag = Math.hypot(dx, dy);

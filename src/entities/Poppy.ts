@@ -4,6 +4,7 @@ import { DogStateMachine } from "../ai/DogStateMachine";
 import { isInSightCone, type Vec2 } from "../ai/SightCone";
 import { positionOnPatrol } from "../ai/Patrol";
 import { isWalkable } from "../levels/yardLayout";
+import { play } from "../audio/sfx";
 
 export type PoppyState = "IDLE" | "BARKING" | "CHASE" | "DISTRACTED";
 
@@ -103,6 +104,7 @@ export class Poppy extends Phaser.Physics.Arcade.Sprite {
     if (sees && this.fsm.current === "IDLE") {
       this.fsm.transition("BARKING");
       this.setTint(0xff5555); // bark flash
+      play(this.scene, "bark");
     }
     if (this.fsm.current === "BARKING" && this.fsm.timeInState >= BARK_DURATION) {
       this.fsm.transition("CHASE");
@@ -144,6 +146,7 @@ export class Poppy extends Phaser.Physics.Arcade.Sprite {
       });
       this.holesDug++;
       this.nextHoleAt = this.elapsedSinceSpawn + Phaser.Math.Between(4, 7);
+      play(this.scene, "dig");
       return;
     }
   }

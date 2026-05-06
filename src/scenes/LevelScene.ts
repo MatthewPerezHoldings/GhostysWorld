@@ -11,6 +11,7 @@ import { LEVELS } from "../levels/levels";
 import { Hud } from "../ui/Hud";
 import { calcLevelScore } from "../score/scoring";
 import { saveLevelTime, saveRunTotal } from "../score/localScores";
+import { play } from "../audio/sfx";
 
 export class LevelScene extends Phaser.Scene {
   private mailman!: Mailman;
@@ -222,6 +223,7 @@ export class LevelScene extends Phaser.Scene {
 
       if (p.kind === "treat" && dGhost < TILE_SIZE) {
         this.ghost.distract(1.0, this.elapsedSec);
+        play(this, "treat");
         p.destroy();
         this.pickups.splice(i, 1);
       } else if (p.kind === "squirrel" && dPoppy < TILE_SIZE * 4) {
@@ -248,6 +250,7 @@ export class LevelScene extends Phaser.Scene {
     if (d < TILE_SIZE) {
       this.ghost.distract(2.0, this.elapsedSec);
       this.poppy.distract(2.0, this.elapsedSec);
+      play(this, "toot");
       this.nextTootAt = this.elapsedSec + 4; // cooldown so it doesn't keep firing
       // Visual cue: tint the area briefly
       const cloud = this.add.circle(
@@ -331,6 +334,7 @@ export class LevelScene extends Phaser.Scene {
     const row = Math.floor(this.mailman.y / TILE_SIZE);
     if (col !== DOOR_COL || row !== DOOR_ROW) return;
     this.won = true;
+    play(this, "chime");
     const cfg = LEVELS[this.levelIndex]!;
     const levelScore = calcLevelScore({
       approachLimitSec: cfg.approachLimitSec,
