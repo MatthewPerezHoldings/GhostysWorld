@@ -9,6 +9,8 @@ import { TouchInput } from "../input/TouchInput";
 import { Pickup } from "../entities/Pickup";
 import { LEVELS } from "../levels/levels";
 import { Hud } from "../ui/Hud";
+import { calcLevelScore } from "../score/scoring";
+import { saveLevelTime, saveRunTotal } from "../score/localScores";
 
 export class LevelScene extends Phaser.Scene {
   private mailman!: Mailman;
@@ -327,23 +329,26 @@ export class LevelScene extends Phaser.Scene {
   private checkWin() {
     const col = Math.floor(this.mailman.x / TILE_SIZE);
     const row = Math.floor(this.mailman.y / TILE_SIZE);
-    if (col === DOOR_COL && row === DOOR_ROW) {
-      this.won = true;
-      const cfg = LEVELS[this.levelIndex]!;
-      const timeBonus = Math.max(0, Math.floor((cfg.approachLimitSec - this.levelTimeSec) * 50));
-      const livesBonus = 1000 * this.livesRemaining;
-      const levelScore = timeBonus + livesBonus;
-      const newRunScore = this.runScore + levelScore;
+    if (col !== DOOR_COL || row !== DOOR_ROW) return;
+    this.won = true;
+    const cfg = LEVELS[this.levelIndex]!;
+    const levelScore = calcLevelScore({
+      approachLimitSec: cfg.approachLimitSec,
+      levelTimeSec: this.levelTimeSec,
+      livesRemaining: this.livesRemaining,
+    });
+    saveLevelTime(this.levelIndex, this.levelTimeSec);
+    const newRunScore = this.runScore + levelScore;
 
-      if (this.levelIndex >= LEVELS.length - 1) {
-        this.scene.start("Leaderboard", { totalScore: newRunScore });
-      } else {
-        this.scene.restart({
-          levelIndex: this.levelIndex + 1,
-          livesRemaining: this.livesRemaining,
-          runScore: newRunScore,
-        });
-      }
+    if (this.levelIndex >= LEVELS.length - 1) {
+      saveRunTotal(newRunScore);
+      this.scene.start("Leaderboard", { totalScore: newRunScore });
+    } else {
+      this.scene.restart({
+        levelIndex: this.levelIndex + 1,
+        livesRemaining: this.livesRemaining,
+        runScore: newRunScore,
+      });
     }
   }
 }
