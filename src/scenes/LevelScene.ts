@@ -5,6 +5,7 @@ import { Mailman } from "../entities/Mailman";
 import { Ghost } from "../entities/Ghost";
 import { Poppy } from "../entities/Poppy";
 import { KeyboardInput } from "../input/KeyboardInput";
+import { TouchInput } from "../input/TouchInput";
 import { Pickup } from "../entities/Pickup";
 import { LEVELS } from "../levels/levels";
 import { Hud } from "../ui/Hud";
@@ -16,6 +17,7 @@ export class LevelScene extends Phaser.Scene {
   private holeGraphics!: Phaser.GameObjects.Graphics;
   private mailmanFrozenUntil = 0;
   private keyboard!: KeyboardInput;
+  private touch!: TouchInput;
   private fenceGroup!: Phaser.Physics.Arcade.StaticGroup;
   private elapsedSec = 0;
   private pickups: Pickup[] = [];
@@ -100,6 +102,7 @@ export class LevelScene extends Phaser.Scene {
     this.holeGraphics = this.add.graphics();
 
     this.keyboard = new KeyboardInput(this);
+    this.touch = new TouchInput(this);
 
     if (cfg.hasTurtlePickup) {
       this.turtleSpawn = new Pickup(this, TILE_SIZE * 12, TILE_SIZE * 9, "turtle");
@@ -127,7 +130,16 @@ export class LevelScene extends Phaser.Scene {
       }
     }
 
-    const intent = this.keyboard.read();
+    const k = this.keyboard.read();
+    const t = this.touch.read();
+    const intent = {
+      moveX: k.moveX || t.moveX,
+      moveY: k.moveY || t.moveY,
+      sneak: k.sneak || t.sneak,
+      dropTreat: k.dropTreat || t.dropTreat,
+      squirrelCall: k.squirrelCall || t.squirrelCall,
+      dropTurtle: k.dropTurtle || t.dropTurtle,
+    };
     if (this.elapsedSec < this.mailmanFrozenUntil) {
       this.mailman.setVelocity(0, 0);
     } else {
