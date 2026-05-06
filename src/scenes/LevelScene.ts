@@ -21,6 +21,7 @@ export class LevelScene extends Phaser.Scene {
   private squirrelCallsLeft = 2;
   private hasTurtle = false;
   private turtleSpawn?: Pickup;
+  private nextTootAt = 0;
 
   constructor() {
     super("Level");
@@ -103,6 +104,9 @@ export class LevelScene extends Phaser.Scene {
     this.ghost.update(deltaSec, mpos, this.elapsedSec);
     this.poppy.update(deltaSec, mpos, { x: this.ghost.x, y: this.ghost.y }, this.elapsedSec);
 
+    this.maybePoppyInGhostSight();
+    this.maybeToot();
+
     this.checkHoleTrips();
     this.renderHoles();
   }
@@ -158,6 +162,43 @@ export class LevelScene extends Phaser.Scene {
         }
       }
     }
+  }
+
+  private maybeToot() {
+    if (this.elapsedSec < this.nextTootAt) return;
+    const d = Phaser.Math.Distance.Between(this.ghost.x, this.ghost.y, this.poppy.x, this.poppy.y);
+    if (d < TILE_SIZE) {
+      this.ghost.distract(2.0, this.elapsedSec);
+      this.poppy.distract(2.0, this.elapsedSec);
+      this.nextTootAt = this.elapsedSec + 4; // cooldown so it doesn't keep firing
+      // Visual cue: tint the area briefly
+      const cloud = this.add.circle(
+        (this.ghost.x + this.poppy.x) / 2,
+        (this.ghost.y + this.poppy.y) / 2,
+        24,
+        0xeeeeaa,
+        0.6,
+      );
+      this.tweens.add({ targets: cloud, alpha: 0, duration: 1500, onComplete: () => cloud.destroy() });
+    }
+  }
+
+  private maybePoppyInGhostSight() {
+    if (this.ghost.currentState === "DISTRACTED") return;
+    const dx = this.poppy.x - this.ghost.x;
+    const dy = this.poppy.y - this.ghost.y;
+    const dist = Math.hypot(dx, dy);
+    if (dist < TILE_SIZE * 1.2) return; // already covered by toot stun proximity
+    if (dist > TILE_SIZE * 8) return;
+    // Check Ghost's facing using its body velocity
+    const body = this.ghost.body as Phaser.Physics.Arcade.Body;
+    const vx = body.velocity.x;
+    const vy = body.velocity.y;
+    const vmag = Math.hypot(vx, vy);
+    if (vmag < 1) return;
+    const cos = (dx * vx + dy * vy) / (dist * vmag);
+    if (cos < Math.cos(Math.PI / 3)) return; // outside 60° half-angle
+    this.ghost.distract(0.5, this.elapsedSec);
   }
 
   private onCaught() {
